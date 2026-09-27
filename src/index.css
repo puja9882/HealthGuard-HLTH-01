@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+:root {
+  --color-clinician: #0e7490;
+  --color-admin: #7c3aed;
+  --color-patient: #059669;
+}
+
+body {
+  @apply bg-slate-50 text-slate-900;
+}
