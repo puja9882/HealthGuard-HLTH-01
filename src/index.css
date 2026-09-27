@@ -1,11 +1,39 @@
 @import "tailwindcss";
 
 :root {
-  --color-clinician: #0e7490;
-  --color-admin: #7c3aed;
-  --color-patient: #059669;
+--color-primary: #0e7490;
+--color-clinician: #0e7490;
+--color-admin: #7c3aed;
+--color-patient: #059669;
+
+--color-background: #f8fafc;
+--color-card: #ffffff;
+--color-text: #0f172a;
+--color-muted: #64748b;
+--color-border: #e2e8f0;
 }
 
+* {
+  box-sizing: border-box;
+  }
+
 body {
-  @apply bg-slate-50 text-slate-900;
+margin: 0;
+min-width: 320px;
+min-height: 100vh;
+background: var(--color-background);
+color: var(--color-text);
+font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+sans-serif;
+}
+
+button,
+input,
+select,
+textarea {
+font: inherit;
+}
+
+button {
+cursor: pointer;
 }

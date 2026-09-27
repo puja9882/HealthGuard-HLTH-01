@@ -43,6 +43,18 @@ export async function login(email, password, role = 'patient') {
     const err = new Error('Invalid credentials'); err.status = 401; throw err;
   }
 
+  if (role === 'admin') {
+    return {
+      token: 'mock.jwt.admin.ADMIN-001',
+      user: {
+        id: 'ADMIN-001',
+        name: 'HealthGuard Administrator',
+        email: email,
+        role: 'admin',
+      },
+    };
+  }
+
   if (role === 'clinician') {
     if (clinicianStore.verificationStatus === 'REJECTED') {
       const err = new Error('Your clinician verification request was rejected.'); err.status = 403; throw err;

@@ -27,6 +27,9 @@ import ClinicianNotifications from '../pages/clinician/Notifications';
 import ClinicianProfile from '../pages/clinician/Profile';
 import ClinicianSettings from '../pages/clinician/Settings';
 
+// Administrative Module
+import AdminDashboard from '../pages/administrative/Dashboard';
+
 // Clinician Patient Record Sub-pages
 import PatientRecord from '../pages/clinician/patient/PatientRecord';
 import PatientOverview from '../pages/clinician/patient/PatientOverview';
@@ -89,6 +92,16 @@ export default function AppRoutes() {
           <Route path="prescription/new" element={<AddPrescription />} />
         </Route>
       </Route>
+
+      {/* Administrative Module Protected Routes */}
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <AdminDashboard />
+          </ProtectedRoute>
+        }
+      />
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

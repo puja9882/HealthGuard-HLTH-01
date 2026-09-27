@@ -9,8 +9,8 @@ export function AuthProvider({ children }) {
     return saved ? JSON.parse(saved) : null;
   });
 
-  async function login(email, password) {
-    const { user: loggedInUser } = await loginRequest(email, password);
+  async function login(email, password, role) {
+    const { user: loggedInUser } = await loginRequest(email, password, role);
     sessionStorage.setItem('hrs_user', JSON.stringify(loggedInUser));
     setUser(loggedInUser);
     return loggedInUser;

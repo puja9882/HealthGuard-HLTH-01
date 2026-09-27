@@ -33,7 +33,7 @@ const roleConfig = {
     ring: 'focus:ring-violet-600',
     button: 'primary',
     canRegister: false,
-    enabled: false,
+    enabled: true,
   },
 };
 
@@ -61,6 +61,8 @@ export default function Login() {
       const user = await login(email, password, role);
       if (role === 'clinician') {
         navigate('/clinician');
+      } else if (role === 'admin') {
+        navigate('/admin');
       } else {
         navigate('/patient');
       }
