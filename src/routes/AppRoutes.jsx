@@ -27,7 +27,8 @@ import ClinicianNotifications from '../pages/clinician/Notifications';
 import ClinicianProfile from '../pages/clinician/Profile';
 import ClinicianSettings from '../pages/clinician/Settings';
 
-// Administrative Module
+// Administrative Module Layout & Pages
+import AdminLayout from '../layouts/AdminLayout';
 import AdminDashboard from '../pages/administrative/Dashboard';
 
 // Clinician Patient Record Sub-pages
@@ -98,10 +99,12 @@ export default function AppRoutes() {
         path="/admin"
         element={
           <ProtectedRoute allowedRoles={['admin']}>
-            <AdminDashboard />
+            <AdminLayout />
           </ProtectedRoute>
         }
-      />
+      >
+        <Route index element={<AdminDashboard />} />
+      </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

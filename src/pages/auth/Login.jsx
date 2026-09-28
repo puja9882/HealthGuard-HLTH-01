@@ -9,29 +9,27 @@ const roleConfig = {
   patient: {
     title: 'Patient login',
     subtitle: 'Access your health records',
-    accent: 'emerald',
-    ring: 'focus:ring-emerald-600',
     button: 'emerald',
-    canRegister: true,
+    ring: 'focus:ring-emerald-600',
+    link: 'text-emerald-700',
     registerLink: '/register',
     enabled: true,
   },
   clinician: {
     title: 'Clinician login',
     subtitle: 'Access authorized patient records',
-    accent: 'cyan',
-    ring: 'focus:ring-blue-600',
-    button: 'primary',
-    canRegister: true,
+    button: 'cyan',
+    ring: 'focus:ring-cyan-600',
+    link: 'text-cyan-700',
     registerLink: '/register/clinician',
     enabled: true,
   },
   admin: {
     title: 'Admin login',
     subtitle: 'Manage the health record system',
-    accent: 'violet',
+    button: 'violet',
     ring: 'focus:ring-violet-600',
-    button: 'primary',
+    link: 'text-violet-700',
     canRegister: false,
     enabled: true,
   },
@@ -88,7 +86,7 @@ export default function Login() {
           <div className="rounded-lg bg-slate-50 border border-slate-200 px-4 py-5 text-center">
             <p className="text-sm font-medium text-slate-800">Coming soon</p>
             <p className="text-sm text-slate-500 mt-1">The {role} portal is not available yet.</p>
-            <Link to="/" className="inline-block mt-4 text-sm text-emerald-700 font-medium hover:underline">
+            <Link to="/" className={`inline-block mt-4 text-sm font-medium hover:underline ${config.link}`}>
               Back to portals
             </Link>
           </div>
@@ -143,7 +141,7 @@ export default function Login() {
             {config.canRegister && (
               <p className="text-sm text-slate-500 mt-5 text-center">
                 Don't have an account?{' '}
-                <Link to={config.registerLink || '/register'} className="text-blue-600 font-medium hover:underline">
+                <Link to={config.registerLink || '/register'} className={`font-medium hover:underline ${config.link}`}>
                   Register
                 </Link>
               </p>

@@ -24,10 +24,10 @@ const portals = [
     icon: Stethoscope,
     accent: 'cyan',
     classes: {
-      border: 'border-blue-200 hover:border-blue-400',
-      iconBg: 'bg-blue-100 text-blue-800',
-      button: 'bg-blue-600 hover:bg-blue-700 text-white',
-      ring: 'focus-visible:ring-blue-600',
+      border: 'border-cyan-200 hover:border-cyan-400',
+      iconBg: 'bg-cyan-100 text-cyan-800',
+      button: 'bg-cyan-700 hover:bg-cyan-800 text-white',
+      ring: 'focus-visible:ring-cyan-600',
     },
   },
   {

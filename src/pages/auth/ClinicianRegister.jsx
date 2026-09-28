@@ -1,312 +1,219 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { registerClinician } from '../../services/api';
-import { Activity, ShieldCheck, CheckCircle2, Clock, ArrowRight, Eye, EyeOff, Building2, UserCheck, Stethoscope } from 'lucide-react';
+import { Eye, EyeOff, Clock, ShieldCheck } from 'lucide-react';
+import Button from '../../components/Button';
+import Card from '../../components/Card';
+
+const initialForm = {
+  fullName: '',
+  email: '',
+  phone: '',
+  password: '',
+  confirmPassword: '',
+  registrationNumber: '',
+  specialization: 'General Physician',
+  organization: '',
+  city: '',
+};
+
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function validate(form) {
+  const errors = {};
+  if (!form.fullName.trim()) errors.fullName = 'Full name is required';
+  if (!form.email.trim()) errors.email = 'Email is required';
+  else if (!emailRegex.test(form.email)) errors.email = 'Invalid email format';
+  if (!form.phone.trim()) errors.phone = 'Phone number is required';
+  if (!form.password) errors.password = 'Password is required';
+  else if (form.password.length < 6) errors.password = 'Password must be at least 6 characters';
+  if (form.confirmPassword !== form.password) errors.confirmPassword = 'Passwords do not match';
+  if (!form.registrationNumber.trim()) errors.registrationNumber = 'Medical registration number is required';
+  if (!form.organization.trim()) errors.organization = 'Hospital or organization name is required';
+  if (!form.city.trim()) errors.city = 'City / Region is required';
+  return errors;
+}
+
+function Field({ label, error, required, children }) {
+  return (
+    <div>
+      <label className="block text-sm font-medium text-slate-700 mb-1">
+        {label} {required && <span className="text-red-500">*</span>}
+      </label>
+      {children}
+      {error && <p className="text-xs text-red-600 mt-1">{error}</p>}
+    </div>
+  );
+}
+
+const inputClass = 'w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-600';
 
 export default function ClinicianRegister() {
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
-    phone: '',
-    password: '',
-    confirmPassword: '',
-    registrationNumber: '',
-    specialization: 'General Physician',
-    organization: '',
-    city: '',
-  });
-
-  const [showPassword, setShowPassword] = useState(false);
+  const [form, setForm] = useState(initialForm);
   const [errors, setErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [verificationPending, setVerificationPending] = useState(null);
 
-  const specializations = [
-    'General Physician',
-    'Cardiologist',
-    'Dermatologist',
-    'Pediatrician',
-    'Orthopedic',
-    'Neurologist',
-    'Dentist',
-    'Other',
-  ];
+  function update(field, value) {
+    setForm((f) => ({ ...f, [field]: value }));
+  }
 
-  const validate = () => {
-    const errs = {};
-    if (!formData.fullName.trim()) errs.fullName = 'Full Name is required.';
-    if (!formData.email.trim()) errs.email = 'Email address is required.';
-    else if (!/\S+@\S+\.\S+/.test(formData.email)) errs.email = 'Enter a valid email address.';
-    if (!formData.phone.trim()) errs.phone = 'Phone number is required.';
-    if (!formData.password) errs.password = 'Password is required.';
-    else if (formData.password.length < 6) errs.password = 'Password must be at least 6 characters.';
-    if (formData.confirmPassword !== formData.password) errs.confirmPassword = 'Passwords do not match.';
-
-    if (!formData.registrationNumber.trim()) errs.registrationNumber = 'Medical registration number is required.';
-    if (!formData.organization.trim()) errs.organization = 'Hospital or organization name is required.';
-    if (!formData.city.trim()) errs.city = 'City / Region is required.';
-
-    setErrors(errs);
-    return Object.keys(errs).length === 0;
-  };
-
-  const handleSubmit = async (e) => {
+  async function handleSubmit(e) {
     e.preventDefault();
-    if (!validate()) return;
+    const validationErrors = validate(form);
+    setErrors(validationErrors);
+    if (Object.keys(validationErrors).length > 0) return;
 
     setSubmitting(true);
     try {
-      const res = await registerClinician(formData);
+      const res = await registerClinician(form);
       setVerificationPending(res.clinician);
     } catch (err) {
-      setErrors({ server: err.message });
+      setErrors({ form: err.message || 'Registration failed' });
     } finally {
       setSubmitting(false);
     }
-  };
+  }
 
   if (verificationPending) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-        <div className="bg-white max-w-md w-full rounded-2xl shadow-xl border border-slate-200 p-8 text-center space-y-6 animate-in fade-in zoom-in-95 duration-200">
-          <div className="w-16 h-16 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center mx-auto border border-amber-500/20">
-            <Clock className="w-8 h-8" />
+        <Card className="max-w-md w-full text-center space-y-5">
+          <div className="w-14 h-14 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center mx-auto border border-amber-200">
+            <Clock size={24} />
           </div>
 
           <div>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-200 mb-3">
-              Status: Pending Verification
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200 mb-2">
+              <ShieldCheck size={13} /> Status: Pending Verification
             </span>
-            <h2 className="text-xl font-bold text-slate-900">Registration Submitted</h2>
-            <p className="text-slate-600 text-xs mt-2 leading-relaxed">
+            <h2 className="text-lg font-semibold text-slate-900">Registration Submitted</h2>
+            <p className="text-slate-600 text-sm mt-1 leading-relaxed">
               Your clinician registration details have been received and submitted for credential verification.
             </p>
           </div>
 
-          <div className="bg-slate-50 rounded-xl p-4 text-left border border-slate-200 text-xs space-y-2">
+          <div className="bg-slate-50 rounded-lg p-4 text-left border border-slate-200 text-sm space-y-2">
             <div className="flex justify-between py-1 border-b border-slate-200/60">
               <span className="text-slate-500">Full Name:</span>
-              <span className="font-semibold text-slate-800">{verificationPending.name}</span>
+              <span className="font-medium text-slate-800">{verificationPending.name}</span>
             </div>
             <div className="flex justify-between py-1 border-b border-slate-200/60">
               <span className="text-slate-500">License Reg No:</span>
-              <span className="font-semibold text-slate-800">{verificationPending.registrationNumber}</span>
+              <span className="font-medium text-slate-800">{verificationPending.registrationNumber}</span>
             </div>
             <div className="flex justify-between py-1 border-b border-slate-200/60">
               <span className="text-slate-500">Specialization:</span>
-              <span className="font-semibold text-slate-800">{verificationPending.specialization}</span>
+              <span className="font-medium text-slate-800">{verificationPending.specialization}</span>
             </div>
             <div className="flex justify-between py-1">
               <span className="text-slate-500">Organization:</span>
-              <span className="font-semibold text-slate-800">{verificationPending.organization}</span>
+              <span className="font-medium text-slate-800">{verificationPending.organization}</span>
             </div>
           </div>
 
-          <div className="p-3 bg-blue-50 rounded-xl text-blue-800 text-[11px] leading-relaxed border border-blue-200 text-left">
+          <div className="p-3 bg-cyan-50 rounded-lg text-cyan-800 text-xs leading-relaxed border border-cyan-200 text-left">
             ℹ️ Access to patient medical records requires verified medical credentials per health privacy policies.
           </div>
 
-          <button
-            onClick={() => navigate('/login/clinician')}
-            className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs rounded-xl transition-all shadow-md"
-          >
+          <Button variant="cyan" className="w-full" onClick={() => navigate('/login/clinician')}>
             Proceed to Clinician Sign In
-          </button>
-        </div>
+          </Button>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center py-10 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-xl w-full bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
-        {/* Banner */}
-        <div className="bg-slate-900 text-white p-6 sm:p-8 relative overflow-hidden">
-          <div className="absolute right-0 top-0 translate-x-4 -translate-y-4 opacity-10">
-            <Stethoscope className="w-48 h-48" />
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4 py-10">
+      <Card className="w-full max-w-lg">
+        <p className="text-xs font-medium uppercase tracking-wide text-slate-400 mb-2">
+          <Link to="/" className="hover:text-slate-600">HealthRecord</Link>
+          {' · '}Clinician
+        </p>
+        <h1 className="text-xl font-semibold text-slate-900 mb-1">Clinician registration</h1>
+        <p className="text-sm text-slate-500 mb-6">
+          Register your medical practitioner account to securely access authorized patient records.
+        </p>
+
+        <form onSubmit={handleSubmit} noValidate className="space-y-4">
+          <Field label="Full Name" required error={errors.fullName}>
+            <input className={inputClass} placeholder="Dr. Full Name" value={form.fullName} onChange={(e) => update('fullName', e.target.value)} />
+          </Field>
+
+          <div className="grid sm:grid-cols-2 gap-4">
+            <Field label="Email Address" required error={errors.email}>
+              <input type="email" className={inputClass} placeholder="doctor@hospital.org" value={form.email} onChange={(e) => update('email', e.target.value)} />
+            </Field>
+            <Field label="Phone Number" required error={errors.phone}>
+              <input className={inputClass} placeholder="+91 98765 43210" value={form.phone} onChange={(e) => update('phone', e.target.value)} />
+            </Field>
           </div>
-          <div className="relative z-10 space-y-2">
-            <Link to="/" className="inline-flex items-center gap-2 text-xs font-bold text-blue-400">
-              <Activity className="w-4 h-4" /> PulseVault Medical
-            </Link>
-            <h1 className="text-2xl font-bold tracking-tight">Clinician Registration</h1>
-            <p className="text-slate-400 text-xs">
-              Register your medical practitioner account to securely access authorized patient records.
-            </p>
-          </div>
-        </div>
 
-        {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-6">
-          {errors.server && (
-            <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs">
-              {errors.server}
-            </div>
-          )}
-
-          {/* Personal Information Section */}
-          <div className="space-y-4">
-            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-              <UserCheck className="w-4 h-4 text-blue-600" /> Personal Details
-            </h3>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Full Name</label>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <Field label="Password" required error={errors.password}>
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  className={`${inputClass} pr-10`}
+                  value={form.password}
+                  onChange={(e) => update('password', e.target.value)}
+                />
+                <button type="button" onClick={() => setShowPassword((s) => !s)} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                  {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+                </button>
+              </div>
+            </Field>
+            <Field label="Confirm Password" required error={errors.confirmPassword}>
               <input
-                type="text"
-                placeholder="Dr. Full Name"
-                value={formData.fullName}
-                onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                type={showPassword ? 'text' : 'password'}
+                className={inputClass}
+                value={form.confirmPassword}
+                onChange={(e) => update('confirmPassword', e.target.value)}
               />
-              {errors.fullName && <p className="text-rose-600 text-[11px] mt-1">{errors.fullName}</p>}
-            </div>
+            </Field>
+          </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Email Address</label>
-                <input
-                  type="email"
-                  placeholder="doctor@hospital.org"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                />
-                {errors.email && <p className="text-rose-600 text-[11px] mt-1">{errors.email}</p>}
+          <div className="pt-2 border-t border-slate-100">
+            <p className="text-sm font-medium text-slate-700 mb-3">Professional Credentials</p>
+            <div className="space-y-4">
+              <Field label="Medical License / Reg Number" required error={errors.registrationNumber}>
+                <input className={inputClass} placeholder="e.g. MH-MED-10293" value={form.registrationNumber} onChange={(e) => update('registrationNumber', e.target.value)} />
+              </Field>
+
+              <div className="grid sm:grid-cols-2 gap-4">
+                <Field label="Specialization">
+                  <select className={inputClass} value={form.specialization} onChange={(e) => update('specialization', e.target.value)}>
+                    {['General Physician', 'Cardiologist', 'Dermatologist', 'Pediatrician', 'Orthopedic', 'Neurologist', 'Dentist', 'Other'].map((spec) => (
+                      <option key={spec} value={spec}>{spec}</option>
+                    ))}
+                  </select>
+                </Field>
+                <Field label="Hospital / Organization" required error={errors.organization}>
+                  <input className={inputClass} placeholder="e.g. City Care Hospital" value={form.organization} onChange={(e) => update('organization', e.target.value)} />
+                </Field>
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Phone Number</label>
-                <input
-                  type="text"
-                  placeholder="+91 98765 43210"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                />
-                {errors.phone && <p className="text-rose-600 text-[11px] mt-1">{errors.phone}</p>}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Password</label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="••••••••"
-                    value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none pr-10"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
-                  >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-                {errors.password && <p className="text-rose-600 text-[11px] mt-1">{errors.password}</p>}
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Confirm Password</label>
-                <input
-                  type="password"
-                  placeholder="••••••••"
-                  value={formData.confirmPassword}
-                  onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                  className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                />
-                {errors.confirmPassword && <p className="text-rose-600 text-[11px] mt-1">{errors.confirmPassword}</p>}
-              </div>
+              <Field label="City / Region" required error={errors.city}>
+                <input className={inputClass} placeholder="e.g. Pune, Maharashtra" value={form.city} onChange={(e) => update('city', e.target.value)} />
+              </Field>
             </div>
           </div>
 
-          <hr className="border-slate-200" />
+          {errors.form && <p className="text-sm text-red-600" role="alert">{errors.form}</p>}
 
-          {/* Professional Information Section */}
-          <div className="space-y-4">
-            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-              <Building2 className="w-4 h-4 text-blue-600" /> Professional Credentials
-            </h3>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Medical License / Reg Number</label>
-              <input
-                type="text"
-                placeholder="e.g. MH-MED-10293"
-                value={formData.registrationNumber}
-                onChange={(e) => setFormData({ ...formData, registrationNumber: e.target.value })}
-                className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              />
-              {errors.registrationNumber && (
-                <p className="text-rose-600 text-[11px] mt-1">{errors.registrationNumber}</p>
-              )}
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Specialization</label>
-                <select
-                  value={formData.specialization}
-                  onChange={(e) => setFormData({ ...formData, specialization: e.target.value })}
-                  className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white"
-                >
-                  {specializations.map((spec) => (
-                    <option key={spec} value={spec}>
-                      {spec}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Hospital / Organization</label>
-                <input
-                  type="text"
-                  placeholder="e.g. City Care Hospital"
-                  value={formData.organization}
-                  onChange={(e) => setFormData({ ...formData, organization: e.target.value })}
-                  className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                />
-                {errors.organization && <p className="text-rose-600 text-[11px] mt-1">{errors.organization}</p>}
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">City / Region</label>
-              <input
-                type="text"
-                placeholder="e.g. Pune, Maharashtra"
-                value={formData.city}
-                onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              />
-              {errors.city && <p className="text-rose-600 text-[11px] mt-1">{errors.city}</p>}
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            disabled={submitting}
-            className="w-full py-3 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-semibold text-xs sm:text-sm rounded-xl transition-all shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2 cursor-pointer"
-          >
+          <Button type="submit" variant="cyan" className="w-full" disabled={submitting}>
             {submitting ? 'Submitting Registration...' : 'Submit for Verification'}
-            <ArrowRight className="w-4 h-4" />
-          </button>
-
-          <div className="text-center">
-            <span className="text-xs text-slate-500">Already registered as a clinician? </span>
-            <Link to="/login/clinician" className="text-xs font-semibold text-blue-600 hover:underline">
-              Sign In Here
-            </Link>
-          </div>
+          </Button>
         </form>
-      </div>
+
+        <p className="text-sm text-slate-500 mt-5 text-center">
+          Already registered as a clinician? <Link to="/login/clinician" className="text-cyan-700 font-medium hover:underline">Sign In Here</Link>
+        </p>
+      </Card>
     </div>
   );
 }

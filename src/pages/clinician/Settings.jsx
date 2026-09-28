@@ -1,6 +1,27 @@
 import { useState } from 'react';
 import { changePassword } from '../../services/api';
-import { Settings as SettingsIcon, Key, Bell, Sun, Moon, CheckCircle2, AlertCircle, Shield } from 'lucide-react';
+import Card from '../../components/Card';
+import Button from '../../components/Button';
+import { CheckCircle2, AlertCircle } from 'lucide-react';
+
+const inputClass = 'w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-600';
+
+function Toggle({ checked, onChange }) {
+  return (
+    <button
+      type="button"
+      onClick={() => onChange(!checked)}
+      className={`relative inline-flex h-6 w-11 shrink-0 rounded-full transition-colors ${checked ? 'bg-cyan-600' : 'bg-slate-300'}`}
+      aria-pressed={checked}
+    >
+      <span
+        className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform mt-1 ${
+          checked ? 'translate-x-6' : 'translate-x-1'
+        }`}
+      />
+    </button>
+  );
+}
 
 export default function Settings() {
   const [currentPassword, setCurrentPassword] = useState('');
@@ -15,8 +36,6 @@ export default function Settings() {
     systemNotifs: true,
     accountAlerts: true,
   });
-
-  const [darkMode, setDarkMode] = useState(false);
 
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
@@ -35,138 +54,96 @@ export default function Settings() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6 animate-in fade-in duration-200">
-      <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs">
-        <h1 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-          <SettingsIcon className="w-5 h-5 text-blue-600" /> Account Settings
-        </h1>
-        <p className="text-xs text-slate-500 mt-0.5">Manage security, notifications, and portal preferences</p>
-      </div>
+    <div className="max-w-2xl space-y-6">
+      <h2 className="text-lg font-semibold text-slate-900">Account Settings</h2>
 
       {/* Security Section */}
-      <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-xs space-y-4">
-        <h2 className="text-base font-bold text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-3">
-          <Key className="w-4 h-4 text-blue-600" /> Security & Password
-        </h2>
-
+      <Card title="Change Password">
         {passwordStatus && (
           <div
-            className={`p-3.5 rounded-xl text-xs font-semibold flex items-center gap-2 ${
+            className={`mb-4 p-3 rounded-lg text-sm flex items-center gap-2 ${
               passwordStatus.type === 'success'
                 ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                : 'bg-rose-50 text-rose-800 border border-rose-200'
+                : 'bg-red-50 text-red-800 border border-red-200'
             }`}
           >
             {passwordStatus.type === 'success' ? (
-              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+              <CheckCircle2 size={16} className="text-emerald-600" />
             ) : (
-              <AlertCircle className="w-4 h-4 text-rose-600" />
+              <AlertCircle size={16} className="text-red-600" />
             )}
             <span>{passwordStatus.text}</span>
           </div>
         )}
 
-        <form onSubmit={handlePasswordSubmit} className="space-y-4 max-w-md text-xs">
+        <form onSubmit={handlePasswordSubmit} className="space-y-3 max-w-sm">
           <div>
-            <label className="block font-semibold text-slate-700 mb-1">Current Password</label>
+            <label htmlFor="clinician-current-password" className="block text-xs text-slate-400 mb-1">Current password</label>
             <input
+              id="clinician-current-password"
               type="password"
-              placeholder="••••••••"
+              required
+              autoComplete="current-password"
+              className={inputClass}
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
-              className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
             />
           </div>
-
           <div>
-            <label className="block font-semibold text-slate-700 mb-1">New Password</label>
+            <label htmlFor="clinician-new-password" className="block text-xs text-slate-400 mb-1">New password</label>
             <input
+              id="clinician-new-password"
               type="password"
-              placeholder="••••••••"
+              required
+              minLength={6}
+              autoComplete="new-password"
+              className={inputClass}
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
             />
           </div>
-
-          <button
-            type="submit"
-            disabled={updatingPassword}
-            className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs rounded-xl shadow-xs cursor-pointer transition-all"
-          >
-            {updatingPassword ? 'Updating...' : 'Change Password'}
-          </button>
+          <Button type="submit" variant="outline" disabled={updatingPassword}>
+            {updatingPassword ? 'Updating...' : 'Update password'}
+          </Button>
         </form>
-      </div>
+      </Card>
 
       {/* Notifications Toggles Section */}
-      <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-xs space-y-4 text-xs">
-        <h2 className="text-base font-bold text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-3">
-          <Bell className="w-4 h-4 text-blue-600" /> Notification Preferences
-        </h2>
-
-        <div className="space-y-3">
-          <div className="flex items-center justify-between py-2 border-b border-slate-100">
+      <Card title="Notification Preferences">
+        <div className="space-y-1">
+          <div className="flex items-center justify-between py-2.5 border-b border-slate-100">
             <div>
-              <span className="font-semibold text-slate-900 block">Patient Record Updates</span>
-              <span className="text-slate-500 text-[11px]">Receive alerts when consultation or prescriptions are added</span>
+              <p className="text-sm font-medium text-slate-800">Patient Record Updates</p>
+              <p className="text-xs text-slate-500 mt-0.5">Receive alerts when consultation or prescriptions are added</p>
             </div>
-            <input
-              type="checkbox"
-              checked={notifState.recordUpdates}
-              onChange={(e) => setNotifState({ ...notifState, recordUpdates: e.target.checked })}
-              className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 cursor-pointer"
-            />
+            <Toggle checked={notifState.recordUpdates} onChange={(v) => setNotifState((s) => ({ ...s, recordUpdates: v }))} />
           </div>
 
-          <div className="flex items-center justify-between py-2 border-b border-slate-100">
+          <div className="flex items-center justify-between py-2.5 border-b border-slate-100">
             <div>
-              <span className="font-semibold text-slate-900 block">Follow-up Reminders</span>
-              <span className="text-slate-500 text-[11px]">Get notified when patient follow-ups are due</span>
+              <p className="text-sm font-medium text-slate-800">Follow-up Reminders</p>
+              <p className="text-xs text-slate-500 mt-0.5">Get notified when patient follow-ups are due</p>
             </div>
-            <input
-              type="checkbox"
-              checked={notifState.followUpReminders}
-              onChange={(e) => setNotifState({ ...notifState, followUpReminders: e.target.checked })}
-              className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 cursor-pointer"
-            />
+            <Toggle checked={notifState.followUpReminders} onChange={(v) => setNotifState((s) => ({ ...s, followUpReminders: v }))} />
           </div>
 
-          <div className="flex items-center justify-between py-2">
+          <div className="flex items-center justify-between py-2.5 border-b border-slate-100">
             <div>
-              <span className="font-semibold text-slate-900 block">System & Security Notices</span>
-              <span className="text-slate-500 text-[11px]">Medical verification and audit trail alerts</span>
+              <p className="text-sm font-medium text-slate-800">System &amp; Security Notices</p>
+              <p className="text-xs text-slate-500 mt-0.5">Medical verification and audit trail alerts</p>
             </div>
-            <input
-              type="checkbox"
-              checked={notifState.systemNotifs}
-              onChange={(e) => setNotifState({ ...notifState, systemNotifs: e.target.checked })}
-              className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 cursor-pointer"
-            />
+            <Toggle checked={notifState.systemNotifs} onChange={(v) => setNotifState((s) => ({ ...s, systemNotifs: v }))} />
+          </div>
+
+          <div className="flex items-center justify-between py-2.5">
+            <div>
+              <p className="text-sm font-medium text-slate-800">Account Alerts</p>
+              <p className="text-xs text-slate-500 mt-0.5">Verification status and account changes</p>
+            </div>
+            <Toggle checked={notifState.accountAlerts} onChange={(v) => setNotifState((s) => ({ ...s, accountAlerts: v }))} />
           </div>
         </div>
-      </div>
-
-      {/* Appearance Section */}
-      <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-xs space-y-4 text-xs">
-        <h2 className="text-base font-bold text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-3">
-          <Sun className="w-4 h-4 text-blue-600" /> Interface Appearance
-        </h2>
-
-        <div className="flex items-center justify-between">
-          <div>
-            <span className="font-semibold text-slate-900 block">Dark Mode</span>
-            <span className="text-slate-500 text-[11px]">Switch between light and dark clinical theme</span>
-          </div>
-          <button
-            onClick={() => setDarkMode(!darkMode)}
-            className="p-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 flex items-center gap-2 font-semibold"
-          >
-            {darkMode ? <Moon className="w-4 h-4 text-purple-600" /> : <Sun className="w-4 h-4 text-amber-500" />}
-            <span>{darkMode ? 'Dark Theme' : 'Light Theme'}</span>
-          </button>
-        </div>
-      </div>
+      </Card>
     </div>
   );
 }

@@ -85,8 +85,17 @@ export function PatientAccessProvider({ children }) {
   );
 }
 
+const NOOP_ACCESS = {
+  authorizedSession: null,
+  secondsRemaining: 0,
+  grantAccess: () => null,
+  clearAccess: () => {},
+  isAuthorizedForPatient: () => false,
+};
+
 export function usePatientAccess() {
   const ctx = useContext(PatientAccessContext);
-  if (!ctx) throw new Error('usePatientAccess must be used within PatientAccessProvider');
-  return ctx;
+  // Safe fallback for consumers rendered outside the clinician layout
+  // (e.g. the shared Sidebar in the patient module has no access session).
+  return ctx || NOOP_ACCESS;
 }

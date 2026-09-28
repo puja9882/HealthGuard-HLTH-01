@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getRecentPatients } from '../../services/api';
 import { usePatientAccess } from '../../context/PatientAccessContext';
-import { Users, QrCode, Lock, ShieldCheck, ArrowRight, Search } from 'lucide-react';
+import Card from '../../components/Card';
+import Button from '../../components/Button';
+import { Users, QrCode, Lock, ShieldCheck, Search, FileClock } from 'lucide-react';
 
 export default function RecentPatients() {
   const navigate = useNavigate();
@@ -43,36 +45,36 @@ export default function RecentPatients() {
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-200">
+    <div className="space-y-4">
       {/* Header & Search */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200 shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-            <Users className="w-5 h-5 text-blue-600" /> Recent Patients Directory
-          </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <h2 className="text-xl font-semibold text-slate-900 flex items-center gap-2">
+            <Users size={20} className="text-cyan-700" /> Recent Patients
+          </h2>
+          <p className="text-sm text-slate-500 mt-0.5">
             Patients you have recently consulted or reviewed
           </p>
         </div>
 
         <div className="relative w-full sm:w-72">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <Search size={16} className="text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             placeholder="Search patient name or ID..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            className="w-full border border-slate-300 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-600"
           />
         </div>
       </div>
 
       {/* Security Info Card */}
-      <div className="bg-amber-50 border border-amber-200 p-4 rounded-2xl text-xs text-amber-900 flex items-start gap-3">
-        <Lock className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+      <div className="p-4 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 flex items-start gap-3 shadow-sm">
+        <Lock size={18} className="text-amber-600 shrink-0 mt-0.5" />
         <div>
-          <h4 className="font-bold text-sm">RBAC Access Protection Notice</h4>
-          <p className="text-amber-800 text-[11px] mt-0.5 leading-relaxed">
+          <h4 className="font-semibold text-sm">RBAC Access Protection Notice</h4>
+          <p className="text-amber-800 text-xs mt-0.5 leading-relaxed">
             Clicking a recent patient will NOT bypass session security. If your temporary session has expired,
             you will be prompted to scan the patient's temporary QR code before records are rendered.
           </p>
@@ -82,78 +84,73 @@ export default function RecentPatients() {
       {/* Patient Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {loading ? (
-          <div className="col-span-full p-8 text-center text-slate-400 text-xs">Loading recent patients directory...</div>
+          <div className="col-span-full py-8 text-center text-slate-400 text-sm">Loading recent patients directory...</div>
         ) : filteredPatients.length === 0 ? (
-          <div className="col-span-full p-8 bg-white rounded-2xl border border-slate-200 text-center text-slate-500 text-xs">
-            No patient records matched your search.
-          </div>
+          <Card className="col-span-full"><p className="text-sm text-slate-500 text-center py-4">No patient records matched your search.</p></Card>
         ) : (
           filteredPatients.map((p) => {
             const hasActiveSession = isAuthorizedForPatient(p.id);
             return (
-              <div
-                key={p.id}
-                className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4 hover:border-slate-300 transition-all"
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-slate-900 text-white font-bold text-sm flex items-center justify-center">
+              <Card key={p.id} className="space-y-3">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 rounded-lg bg-cyan-50 text-cyan-800 font-medium text-sm flex items-center justify-center shrink-0">
                       {p.name.substring(0, 2).toUpperCase()}
                     </div>
-                    <div>
+                    <div className="min-w-0">
                       <div className="flex items-center gap-2">
-                        <h3 className="font-bold text-slate-900 text-base">{p.name}</h3>
-                        <span className="font-mono text-[11px] text-slate-500 font-semibold px-2 py-0.5 bg-slate-100 rounded-md">
+                        <h3 className="font-medium text-slate-800 text-sm truncate">{p.name}</h3>
+                        <span className="font-mono text-[11px] text-slate-500 px-1.5 py-0.5 bg-slate-100 rounded">
                           {p.id}
                         </span>
                       </div>
-                      <p className="text-xs text-slate-500">
+                      <p className="text-xs text-slate-500 mt-0.5">
                         {p.gender} • {p.age} yrs • Blood Group: <strong className="text-rose-600">{p.bloodGroup}</strong>
                       </p>
                     </div>
                   </div>
 
                   {hasActiveSession ? (
-                    <span className="px-2.5 py-1 bg-emerald-50 text-emerald-800 text-[11px] font-bold rounded-full border border-emerald-200 flex items-center gap-1">
-                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" /> Active Session
+                    <span className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200">
+                      <ShieldCheck size={13} /> Active Session
                     </span>
                   ) : (
-                    <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-[11px] font-semibold rounded-full border border-slate-200">
+                    <span className="shrink-0 px-2 py-0.5 bg-slate-100 text-slate-600 text-xs font-medium rounded-full border border-slate-200">
                       QR Required
                     </span>
                   )}
                 </div>
 
-                <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 text-xs space-y-1 text-slate-600">
-                  <div className="flex justify-between">
-                    <span>Last Visit:</span>
-                    <strong className="text-slate-800">{p.lastVisit}</strong>
+                <div className="bg-slate-50 p-3 rounded-lg border border-slate-100 text-xs space-y-1.5 text-slate-600">
+                  <div className="flex items-center justify-between">
+                    <span className="flex items-center gap-1.5"><FileClock size={13} className="text-slate-400" />Last Visit:</span>
+                    <span className="font-medium text-slate-800">{p.lastVisit}</span>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex items-center justify-between">
                     <span>Recent Action:</span>
-                    <span className="text-blue-700 font-medium">{p.lastAction || 'Consultation'}</span>
+                    <span className="text-cyan-700 font-medium">{p.lastAction || 'Consultation'}</span>
                   </div>
                 </div>
 
-                <button
+                <Button
+                  variant={hasActiveSession ? 'primary' : 'cyan'}
                   onClick={() => handleAccessRequest(p.id)}
-                  className={`w-full py-2.5 rounded-xl font-semibold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                    hasActiveSession
-                      ? 'bg-slate-900 hover:bg-slate-800 text-white shadow-xs'
-                      : 'bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-600/20'
-                  }`}
+                  className="w-full"
                 >
                   {hasActiveSession ? (
-                    <>Open Patient Record <ArrowRight className="w-4 h-4" /></>
+                    <>Open Patient Record</>
                   ) : (
-                    <>Scan QR to Access Record <QrCode className="w-4 h-4" /></>
+                    <><QrCode size={15} className="inline mr-1.5 -mt-0.5" />Scan QR to Access Record</>
                   )}
-                </button>
-              </div>
+                </Button>
+              </Card>
             );
           })
         )}
       </div>
+
+      {/* Hidden helper link kept for keyboard users (matches old sidebar escape hatch) */}
+      <Link to="/clinician/scan" className="sr-only">Scan Patient QR</Link>
     </div>
   );
 }
